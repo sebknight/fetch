@@ -1,0 +1,14 @@
+#picture {
+    margin: 0 auto;
+    height: 250px;
+    width: 500px;
+}
+#picture > img {
+    background-image: contain;
+}
+
+#article {
+    margin: 0 auto;
+    height: 500px;
+    width: 500px;
+}
