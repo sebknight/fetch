@@ -1,14 +1,43 @@
-#picture {
-    margin: 0 auto;
-    height: 250px;
-    width: 500px;
+/* .container {
+    display: flex;
+} */
+
+.heading {
+    display: block;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
 }
+/* #fetch {
+    display: block;
+} */
+.content {
+    display: flex;
+    height: 100%;
+}
+#picture {
+    display: flex;
+    margin: 2rem;
+    width: 100%;
+    /* height: 250px;
+    width: 500px; */
+} 
 #picture > img {
     background-image: contain;
 }
 
 #article {
-    margin: 0 auto;
-    height: 500px;
-    width: 500px;
+    /* margin: 0 auto; */
+    margin-left: 2rem;
+    margin-right: 2rem;
+    /* height: 500px; */
+    width: 100%;;
+}
+
+.description {
+    display: block;
+    width: 100%;
+}
+
+.btn {
+    margin-top: 2rem;
 }

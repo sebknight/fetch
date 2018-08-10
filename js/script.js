@@ -16,7 +16,7 @@ function getDog() {
                    data: {
                        action: 'query',
                        list: 'search',
-                       srsearch: breed,
+                       srsearch: breed + " dog",
                        format: 'json',
                        formatversion: 2
                    },
