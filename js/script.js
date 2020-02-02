@@ -22,15 +22,14 @@ const getFacts = data => {
   const pathArr = path.split('/');
   const breedIndex = pathArr[4];
   const breed = breedIndex.replace('-', '%20');
-  fetch(`http://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${breed}&format=jsonfm`, {
+  fetch(`http://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${breed}%20dog&format=jsonfm`, {
     method: 'GET',
-    // headers: headers
   })
   .then((res) => {
     return res.json();
   })
   .then((data) => {
-    console.log(data);
+    console.log(data.query.search[0].snippet);
   })
 }
 
