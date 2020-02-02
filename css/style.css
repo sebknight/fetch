@@ -1,35 +1,31 @@
 
 .heading {
-    display: block;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
+  display: block;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .content {
-    display: flex;
-    height: 100%;
-}
-#picture {
-    display: flex;
-    margin: 2rem;
-    width: 100%;
-
-} 
-#picture > img {
-    background-image: contain;
+  display: flex;
+  height: 100%;
 }
 
 #article {
-    margin-left: 2rem;
-    margin-right: 2rem;
-    width: 100%;;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  width: 100%;;
 }
 
 .description {
-    display: block;
-    width: 100%;
+  display: block;
+  width: 100%;
 }
 
 .btn {
-    margin-top: 2rem;
+  margin-top: 2rem;
+}
+
+#image {
+  max-width: 500px;
+  height: auto;
 }
