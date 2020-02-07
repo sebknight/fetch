@@ -102,9 +102,10 @@ async function getFacts(query) {
 
     // Scrub the markup to get text
     const cleanSnippet = snippet.replace(/<\/?[a-z][a-z0-9]*[^<>]*>/ig, '');
+    const escapedQuotesSnippet = cleanSnippet.replace(/&quot;/ig, '"');
 
     // Get the first sentence of the snippet
-    const firstSentence = `${cleanSnippet.substring(0, cleanSnippet.indexOf('.'))}.`;
+    const firstSentence = `${escapedQuotesSnippet.substring(0, escapedQuotesSnippet.indexOf('.'))}.`;
 
     // Reduce garbage output
     // These breeds have oddly punctuated/inaccurate/weird snippets
