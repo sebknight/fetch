@@ -7,6 +7,8 @@ const link = document.querySelector('.content__link');
 const loader = document.querySelector('.loader');
 const title = document.querySelector('.content__title');
 
+const domParser = new DOMParser();
+
 // Endpoints
 const dogAPI = 'https://dog.ceo/api/breeds/image/random';
 const wikiAPI = 'https://en.wikipedia.org/w/api.php';
@@ -33,10 +35,10 @@ async function getDogs(api) {
     // Get data
     let response = await fetch(api);
     let data = await response.json();
+    console.log(data);
     
     // Get image
-    let path = await data;
-    path = data.message;
+    let path = data.message;
 
     // Handles edge case where plott hound serves txt
     if (!path.includes('.txt')) {
@@ -57,6 +59,7 @@ async function getDogs(api) {
   } catch(err) {
     // Show dog emoji if Dog API call fails
     img.src = './img/dog.png';
+    img.alt = 'Dog emoji';
     hideLoader();
   }
 }
@@ -85,7 +88,9 @@ async function getFacts(query) {
       }
     };
 
+    // Scrub title and set the image alt text
     title.textContent = cleanTitle();
+    img.alt = cleanTitle();
 
     // Get page link
     let pageID = data.query.search[0].pageid;
@@ -96,12 +101,7 @@ async function getFacts(query) {
     let snippet = data.query.search[0].snippet;
 
     // Scrub the markup to get text
-    // Not ideal to use innerHTML, but should be OK because it just returns text content
-    // Faster than a regex and accounts for escaped characters
-    const div = document.createElement('div');
-    div.innerHTML = snippet;
-    const cleanSnippet = div.textContent;
-    div.remove();
+    const cleanSnippet = snippet.replace(/<\/?[a-z][a-z0-9]*[^<>]*>/ig, '');
 
     // Get the first sentence of the snippet
     const firstSentence = `${cleanSnippet.substring(0, cleanSnippet.indexOf('.'))}.`;
@@ -111,7 +111,7 @@ async function getFacts(query) {
     const edgeCases = 
     ['Akita', 'Chihuahua', 'Keeshond', 'Leonberg', 
     'Malinois', 'mixed', 'Old English Bulldog',
-    'Parson', 'Siberian'];
+    'Jack', 'Siberian'];
 
     // Check if sentence contains any of the edge cases
     const isEdgeCase = edgeCases.some(c => firstSentence.includes(c));
