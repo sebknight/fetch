@@ -35,7 +35,13 @@ async function getDogs(api) {
     
     // Get image
     let path = data.message;
-    img.src = path;
+
+    // Handles edge case where plott hound serves txt
+    if (!path.includes('hound-plott')) {
+      img.src = path;
+    } else {
+      throw new Error('Invalid dog');
+    }
 
     // Break down the response to extract the breed name
     let pathArr = path.split('/');
@@ -105,7 +111,6 @@ async function getFacts(query) {
     await new Promise((resolve, reject) => setTimeout(resolve, 750));
     hideLoader();
   } catch(err) {
-    // Handle cases where image loads and Wiki query fails
     article.textContent = 'All dogs are good dogs.'
   }
 }
