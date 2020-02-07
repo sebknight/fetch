@@ -1,9 +1,11 @@
+// DOM nodes
 const article = document.querySelector('.content__article');
 const button = document.querySelector('.btn');
 const content = document.querySelector('.content');
 const img = document.querySelector('.content__img');
 const loader = document.querySelector('.loader');
 
+// Endpoints and error handler
 const dogAPI = 'https://dog.ceo/api/breeds/image/random';
 const wikiAPI = 'https://en.wikipedia.org/w/api.php';
 
@@ -11,6 +13,7 @@ const handleError = (err) => {
   article.textContent = `Oops. No dogs available right now because ${err}. Try again!`
 }
 
+// Loader toggles
 const showLoader = () => {
   content.style.display = 'none';
   loader.style.visibility = 'visible';
@@ -21,6 +24,7 @@ const hideLoader = () => {
   content.style.display = 'flex';
 }
 
+// Query the Dog API
 async function getDogs(api) {
   try {
     // Get data
@@ -47,6 +51,7 @@ async function getDogs(api) {
   }
 }
 
+// Query the Wikipedia API
 async function getFacts(query) {
   try {
     let response = await fetch(query);
