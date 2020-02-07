@@ -1,25 +1,23 @@
 // DOM nodes
 const article = document.querySelector('.content__article');
-const button = document.querySelector('.btn');
+const btn = document.querySelector('.btn');
 const content = document.querySelector('.content');
 const img = document.querySelector('.content__img');
 const loader = document.querySelector('.loader');
 
-// Endpoints and error handler
+// Endpoints
 const dogAPI = 'https://dog.ceo/api/breeds/image/random';
 const wikiAPI = 'https://en.wikipedia.org/w/api.php';
 
-const handleError = (err) => {
-  article.textContent = `Oops. No dogs available right now because ${err}. Try again!`
-}
-
-// Loader toggles
+// Toggle loader and prevent multiple requests
 const showLoader = () => {
+  btn.disabled = true;
   content.style.display = 'none';
   loader.style.visibility = 'visible';
 }
 
 const hideLoader = () => {
+  btn.disabled = false;
   loader.style.visibility = 'hidden';
   content.style.display = 'flex';
 }
@@ -47,45 +45,64 @@ async function getDogs(api) {
 
     return query;
   } catch(err) {
-    handleError(err);
+    // Show dog emoji if Dog API call fails
+    img.src = './img/dog.png';
+    hideLoader();
   }
 }
 
 // Query the Wikipedia API
 async function getFacts(query) {
   try {
+    // Get data
     let response = await fetch(query);
     let data = await response.json();
     
-    // Get snippet - make sure we're not looking for it too early
-    let snippet = await data.query.search[0].snippet;
-      // Not ideal to use innerHTML, but should be OK 
-      // because it only returns text content.
-      // Faster than using a regex and accounts for escaped characters
-      const div = document.createElement('div');
-      div.innerHTML = snippet;
-      const cleanSnippet = div.textContent;
-      const firstSentence = `${cleanSnippet.substring(0, cleanSnippet.indexOf('.'))}.`;
+    // Get snippet
+    let snippet = await data;
+    snippet = data.query.search[0].snippet;
 
-      // Reduces garbage output
-      if (firstSentence[0] !== firstSentence[0].toLowerCase() && firstSentence.length > 20) {
-        article.textContent = firstSentence;
-      } else {
-        article.textContent = 'What kind of dog is that? A good one!';
-      }
+    // Some breeds have no search results on Wikipedia
+    if (!snippet) {
+      article.textContent = 'What kind of dog is that? A good one!'
+    }
 
-      // Wait to hide loader - Dog API isn't the fastest at serving images
-      await new Promise((resolve, reject) => setTimeout(resolve, 750));
+    // Scrub the markup to get text
+    // Not ideal to use innerHTML, but should be OK because it just returns text content
+    // Faster than a regex and accounts for escaped characters
+    const div = document.createElement('div');
+    div.innerHTML = snippet;
+    const cleanSnippet = div.textContent;
 
-      hideLoader();
+    // Get the first sentence of the snippet
+    const firstSentence = `${cleanSnippet.substring(0, cleanSnippet.indexOf('.'))}.`;
 
+    // Reduce garbage output
+    // These breeds have oddly punctuated/inaccurate/weird snippets
+    const edgeCases = ['Chihuahua', 'Keeshond', 'Malinois', 'mixed', 'Old English Bulldog', 'Siberian'];
+    // Check if sentence contains any of the edge cases
+    const isEdgeCase = edgeCases.some(c => firstSentence.includes(c));
+    
+    // Some snippets seem to start mid-sentence
+    const hasCaps = firstSentence[0] !== firstSentence[0].toLowerCase();
+
+    if (!isEdgeCase && hasCaps && firstSentence.length > 20) {
+      article.textContent = firstSentence;
+    } else {
+      article.textContent = 'What kind of dog is that? A good one!';
+    }
+
+    // Wait to hide loader - Dog API isn't the fastest at serving images
+    await new Promise((resolve, reject) => setTimeout(resolve, 1000));
+    hideLoader();
   } catch(err) {
-    handleError(err);
+    // Handle cases where image loads and Wiki query fails
+    article.textContent = 'All dogs are good dogs.'
   }
 }
 
 // Fetch those dogs!
-button.addEventListener('click', () => {
+btn.addEventListener('click', () => {
   showLoader();
   getDogs(dogAPI)
     .then(query => getFacts(query))
