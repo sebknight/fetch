@@ -5,6 +5,7 @@ const content = document.querySelector('.content');
 const img = document.querySelector('.content__img');
 const link = document.querySelector('.content__link');
 const loader = document.querySelector('.loader');
+const title = document.querySelector('.content__title');
 
 // Endpoints
 const dogAPI = 'https://dog.ceo/api/breeds/image/random';
@@ -67,7 +68,16 @@ async function getFacts(query) {
     // Get data
     let response = await fetch(query);
     let data = await response.json();
+    console.log(data);
     
+    // Get page title
+    let pageTitle = await data;
+    pageTitle = data.query.search[0].title;
+    
+    // Remove anything in brackets e.g. disambiguation
+    cleanTitle = pageTitle.substring(0, pageTitle.indexOf('('));
+    title.textContent = cleanTitle;
+
     // Get page link
     let pageID = await data;
     pageID = data.query.search[0].pageid;
@@ -95,7 +105,11 @@ async function getFacts(query) {
 
     // Reduce garbage output
     // These breeds have oddly punctuated/inaccurate/weird snippets
-    const edgeCases = ['Chihuahua', 'Keeshond', 'Malinois', 'mixed', 'Old English Bulldog', 'Siberian'];
+    const edgeCases = 
+    ['Akita', 'Chihuahua', 'Keeshond', 'Leonberg', 
+    'Malinois', 'mixed', 'Old English Bulldog',
+    'Parson', 'Siberian'];
+
     // Check if sentence contains any of the edge cases
     const isEdgeCase = edgeCases.some(c => firstSentence.includes(c));
     
@@ -106,6 +120,7 @@ async function getFacts(query) {
     if (!isEdgeCase && hasCaps && firstSentence.length > 20) {
       article.textContent = firstSentence;
     } else {
+      title.textContent = "A Good Dog";
       article.textContent = 'What kind of dog is that? A good one!';
     }
 
