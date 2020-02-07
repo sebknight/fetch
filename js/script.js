@@ -42,7 +42,7 @@ async function getDogs(api) {
     if (!path.includes('hound-plott')) {
       img.src = path;
     } else {
-      throw new Error('Invalid dog');
+      throw new Error('invalid dog');
     }
 
     // Break down the response to extract the breed name
@@ -53,7 +53,6 @@ async function getDogs(api) {
 
     // Build query for Wikipedia API
     let query = `${wikiAPI}?action=query&list=search&srsearch=${breed}%20dog&format=json&origin=*`
-
     return query;
   } catch(err) {
     // Show dog emoji if Dog API call fails
@@ -68,30 +67,33 @@ async function getFacts(query) {
     // Get data
     let response = await fetch(query);
     let data = await response.json();
-    console.log(data);
-    
+
+    await data; 
+    if (data.query.search.length === 0) {
+      throw new Error('no results');
+    }
+
     // Get page title
-    let pageTitle = await data;
-    pageTitle = data.query.search[0].title;
+    let pageTitle = data.query.search[0].title;
     
     // Remove anything in brackets e.g. disambiguation
-    cleanTitle = pageTitle.substring(0, pageTitle.indexOf('('));
-    title.textContent = cleanTitle;
+    const cleanTitle = () => {
+      if (pageTitle.includes('(')) {
+        return pageTitle.substring('0', pageTitle.indexOf('('));
+      }
+      return pageTitle;
+    };
+
+    title.textContent = cleanTitle();
 
     // Get page link
-    let pageID = await data;
-    pageID = data.query.search[0].pageid;
+    // let pageID = await data;
+    const pageID = data.query.search[0].pageid;
     link.style.display = 'flex';
     link.href = `https://en.wikipedia.org?curid=${pageID}`;
     
     // Get snippet
-    let snippet = await data;
-    snippet = data.query.search[0].snippet;
-
-    // Some breeds have no search results on Wikipedia
-    if (!snippet) {
-      article.textContent = 'What kind of dog is that? A good one!'
-    }
+    let snippet = data.query.search[0].snippet;
 
     // Scrub the markup to get text
     // Not ideal to use innerHTML, but should be OK because it just returns text content
@@ -120,15 +122,19 @@ async function getFacts(query) {
     if (!isEdgeCase && hasCaps && firstSentence.length > 20) {
       article.textContent = firstSentence;
     } else {
-      title.textContent = "A Good Dog";
-      article.textContent = 'What kind of dog is that? A good one!';
+      throw new Error('invalid snippet');
     }
 
     // Wait to hide loader - Dog API isn't the fastest at serving images
     await new Promise((resolve, reject) => setTimeout(resolve, 750));
     hideLoader();
   } catch(err) {
-    article.textContent = 'All dogs are good dogs.'
+    // Set generic content on failure
+    title.textContent = 'A Good Dog';
+    article.textContent = 'All dogs are good dogs.';
+    hideLoader();
+  } finally {
+    return;
   }
 }
 
