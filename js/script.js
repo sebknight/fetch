@@ -34,7 +34,8 @@ async function getDogs(api) {
     let data = await response.json();
     
     // Get image
-    let path = data.message;
+    let path = await data;
+    path = data.message;
 
     // Handles edge case where plott hound serves txt
     if (!path.includes('hound-plott')) {
@@ -44,10 +45,10 @@ async function getDogs(api) {
     }
 
     // Break down the response to extract the breed name
-    let pathArr = path.split('/');
-    let breedIndex = pathArr[4];
+    const pathArr = path.split('/');
+    const breedIndex = pathArr[4];
     // Replace any dashes in the breed name with a space
-    let breed = breedIndex.replace('-', '%20');
+    const breed = breedIndex.replace('-', '%20');
 
     // Build query for Wikipedia API
     let query = `${wikiAPI}?action=query&list=search&srsearch=${breed}%20dog&format=json&origin=*`
@@ -101,6 +102,7 @@ async function getFacts(query) {
     // Some snippets seem to start mid-sentence
     const hasCaps = firstSentence[0] !== firstSentence[0].toLowerCase();
 
+    // 20 char limit catches junk snippets
     if (!isEdgeCase && hasCaps && firstSentence.length > 20) {
       article.textContent = firstSentence;
     } else {
