@@ -39,10 +39,10 @@ async function getDogs(api) {
     path = data.message;
 
     // Handles edge case where plott hound serves txt
-    if (!path.includes('hound-plott')) {
+    if (!path.includes('.txt')) {
       img.src = path;
     } else {
-      throw new Error('invalid dog');
+      throw new Error('invalid format');
     }
 
     // Break down the response to extract the breed name
@@ -87,8 +87,7 @@ async function getFacts(query) {
     title.textContent = cleanTitle();
 
     // Get page link
-    // let pageID = await data;
-    const pageID = data.query.search[0].pageid;
+    let pageID = data.query.search[0].pageid;
     link.style.display = 'flex';
     link.href = `https://en.wikipedia.org?curid=${pageID}`;
     
