@@ -1,84 +1,87 @@
-const button = document.querySelector('.btn');
-const imgContainer = document.querySelector('.content__img-container');
-const img = document.querySelector('.content__img');
-const title = document.querySelector('.content__title');
 const article = document.querySelector('.content__article');
-const loader = document.querySelector('.content__loader');
+const button = document.querySelector('.btn');
+const content = document.querySelector('.content');
+const img = document.querySelector('.content__img');
+const loader = document.querySelector('.loader');
+
+const dogAPI = 'https://dog.ceo/api/breeds/image/random';
+const wikiAPI = 'https://en.wikipedia.org/w/api.php';
+
+const handleError = (err) => {
+  article.textContent = `Oops. No dogs available right now because ${err}. Try again!`
+}
 
 const showLoader = () => {
-  img.style.display = 'none';
+  content.style.display = 'none';
   loader.style.visibility = 'visible';
 }
 
 const hideLoader = () => {
   loader.style.visibility = 'hidden';
-  img.style.display = 'block';
+  content.style.display = 'flex';
 }
 
-const getImage = data => {
-  const path = data.message;
-  img.src = path;
-  hideLoader();
-}
+async function getDogs(api) {
+  try {
+    // Get data
+    let response = await fetch(api);
+    let data = await response.json();
+    
+    // Get image
+    let path = data.message;
+    img.src = path;
 
-const getBreed = data => {
-  const path = data.message;
-  // Break down the response to extract the breed name
-  const pathArr = path.split('/');
-  const breedIndex = pathArr[4];
-  // Replace any dashes in the breed name with a space
-  return breedIndex.replace('-', '%20');
-}
+    // Get breed
+    // Break down the response to extract the breed name
+    let pathArr = path.split('/');
+    let breedIndex = pathArr[4];
+    // Replace any dashes in the breed name with a space
+    let breed = breedIndex.replace('-', '%20');
 
-const getSnippet = snippet => {
-  if (snippet) {
-    // Not ideal to use innerHTML, but should be OK 
-    // because it only returns text content.
-    // Faster than using a regex and accounts for escaped characters
-    const div = document.createElement('div');
-    div.innerHTML = snippet;
-    const cleanSnippet = div.textContent;
-    const firstSentence = `${cleanSnippet.substring(0, cleanSnippet.indexOf('.'))}.`;
-    // Reduces garbage output by checking sentence starts with an upper case letter
-    // and is longer than 15 characters
-    if (firstSentence[0] !== firstSentence[0].toLowerCase() && firstSentence.length > 15) {
-      return article.textContent = firstSentence;
-    } else {
-      return article.textContent = 'What kind of dog is that? A good one!';
-    }
+    // Build query for Wikipedia API
+    let query = `${wikiAPI}?action=query&list=search&srsearch=${breed}%20dog&format=json&origin=*`
+
+    return query;
+  } catch(err) {
+    handleError(err);
   }
 }
 
+async function getFacts(query) {
+  try {
+    let response = await fetch(query);
+    let data = await response.json();
+    
+    // Get snippet - make sure we're not looking for it too early
+    let snippet = await data.query.search[0].snippet;
+      // Not ideal to use innerHTML, but should be OK 
+      // because it only returns text content.
+      // Faster than using a regex and accounts for escaped characters
+      const div = document.createElement('div');
+      div.innerHTML = snippet;
+      const cleanSnippet = div.textContent;
+      const firstSentence = `${cleanSnippet.substring(0, cleanSnippet.indexOf('.'))}.`;
 
-const getFacts = data => {
-  const breed = getBreed(data);
-  // Query the Wikipedia API for the breed
-  fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${breed}%20dog&format=json&origin=*`, {
-    method: 'GET',
-  })
-  .then((res) => {
-    return res.json();
-  })
-  .then((data) => {
-    const snippet = data.query.search[0].snippet;
-    getSnippet(snippet);
-  })
+      // Reduces garbage output
+      if (firstSentence[0] !== firstSentence[0].toLowerCase() && firstSentence.length > 20) {
+        article.textContent = firstSentence;
+      } else {
+        article.textContent = 'What kind of dog is that? A good one!';
+      }
+
+      // Wait to hide loader - Dog API isn't the fastest at serving images
+      await new Promise((resolve, reject) => setTimeout(resolve, 750));
+
+      hideLoader();
+
+  } catch(err) {
+    handleError(err);
+  }
 }
 
-const dogReq = new Request('https://dog.ceo/api/breeds/image/random');
-
-// Query the Dog API!
+// Fetch those dogs!
 button.addEventListener('click', () => {
-  fetch(dogReq)
-  .then((res) => {
-    showLoader();
-    return res.json();
-    })
-    .then((data) => {
-    getImage(data);
-    getFacts(data);
-  })
-  .catch(() => {
-    console.log(`Error`)
-  })
+  showLoader();
+  getDogs(dogAPI)
+    .then(query => getFacts(query))
 });

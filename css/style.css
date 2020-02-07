@@ -25,12 +25,12 @@
   margin-top: 2rem;
 }
 
-.content__image {
-  max-width: 500px;
-  max-height: 500px;
+.content__img {
+  max-width: 250px;
+  max-height: 250px;
 }
 
-.content__loader {
+.loader {
   visibility: hidden;
   z-index: -1;
   border: 16px solid #f3f3f3; /* Light grey */
