@@ -26,8 +26,12 @@
 }
 
 .content__img {
-  max-width: 250px;
-  max-height: 250px;
+  max-width: 500px;
+  max-height: 500px;
+}
+
+.content__link {
+  display: none;
 }
 
 .loader {

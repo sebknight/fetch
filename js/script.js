@@ -3,6 +3,7 @@ const article = document.querySelector('.content__article');
 const btn = document.querySelector('.btn');
 const content = document.querySelector('.content');
 const img = document.querySelector('.content__img');
+const link = document.querySelector('.content__link');
 const loader = document.querySelector('.loader');
 
 // Endpoints
@@ -25,6 +26,9 @@ const hideLoader = () => {
 // Query the Dog API
 async function getDogs(api) {
   try {
+    // Clear previous image
+    img.src = '';
+
     // Get data
     let response = await fetch(api);
     let data = await response.json();
@@ -33,7 +37,6 @@ async function getDogs(api) {
     let path = data.message;
     img.src = path;
 
-    // Get breed
     // Break down the response to extract the breed name
     let pathArr = path.split('/');
     let breedIndex = pathArr[4];
@@ -57,6 +60,12 @@ async function getFacts(query) {
     // Get data
     let response = await fetch(query);
     let data = await response.json();
+    
+    // Get page link
+    let pageID = await data;
+    pageID = data.query.search[0].pageid;
+    link.style.display = 'flex';
+    link.href = `https://en.wikipedia.org?curid=${pageID}`;
     
     // Get snippet
     let snippet = await data;
@@ -93,7 +102,7 @@ async function getFacts(query) {
     }
 
     // Wait to hide loader - Dog API isn't the fastest at serving images
-    await new Promise((resolve, reject) => setTimeout(resolve, 1000));
+    await new Promise((resolve, reject) => setTimeout(resolve, 750));
     hideLoader();
   } catch(err) {
     // Handle cases where image loads and Wiki query fails
