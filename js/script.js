@@ -1,6 +1,6 @@
 const button = document.querySelector('.btn');
-const imgContainer = document.querySelector('.content__image-container');
-const img = document.querySelector('.content__image');
+const imgContainer = document.querySelector('.content__img-container');
+const img = document.querySelector('.content__img');
 const title = document.querySelector('.content__title');
 const article = document.querySelector('.content__article');
 const loader = document.querySelector('.content__loader');
@@ -16,18 +16,42 @@ const hideLoader = () => {
 }
 
 const getImage = data => {
-  img.onload = hideLoader();
   const path = data.message;
   img.src = path;
+  hideLoader();
 }
 
-const getFacts = data => {
+const getBreed = data => {
   const path = data.message;
   // Break down the response to extract the breed name
   const pathArr = path.split('/');
   const breedIndex = pathArr[4];
   // Replace any dashes in the breed name with a space
-  const breed = breedIndex.replace('-', '%20');
+  return breedIndex.replace('-', '%20');
+}
+
+const getSnippet = snippet => {
+  if (snippet) {
+    // Not ideal to use innerHTML, but should be OK 
+    // because it only returns text content.
+    // Faster than using a regex and accounts for escaped characters
+    const div = document.createElement('div');
+    div.innerHTML = snippet;
+    const cleanSnippet = div.textContent;
+    const firstSentence = `${cleanSnippet.substring(0, cleanSnippet.indexOf('.'))}.`;
+    // Reduces garbage output by checking sentence starts with an upper case letter
+    // and is longer than 15 characters
+    if (firstSentence[0] !== firstSentence[0].toLowerCase() && firstSentence.length > 15) {
+      return article.textContent = firstSentence;
+    } else {
+      return article.textContent = 'What kind of dog is that? A good one!';
+    }
+  }
+}
+
+
+const getFacts = data => {
+  const breed = getBreed(data);
   // Query the Wikipedia API for the breed
   fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${breed}%20dog&format=json&origin=*`, {
     method: 'GET',
@@ -36,27 +60,8 @@ const getFacts = data => {
     return res.json();
   })
   .then((data) => {
-    // Get the snippet, scrub it of markup, 
-    // then extract the first sentence
-    // and replace the full stop
     const snippet = data.query.search[0].snippet;
-
-    // Not ideal to use innerHTML, but should be OK 
-    // because it only returns text content.
-    // Faster than using a regex and accounts for escaped characters
-    const cleanSnippet = () => {
-      if (snippet) {
-        const div = document.createElement('div');
-        div.innerHTML = snippet;
-        return div.textContent;
-      }
-    }
-    
-    const firstSentence = `${cleanSnippet().substring(0, cleanSnippet().indexOf('.'))}.`;
-    // Reduces garbage output
-    firstSentence.length > 10 ?
-      article.textContent = firstSentence :
-      article.textContent = 'What kind of dog is that? A good one!' 
+    getSnippet(snippet);
   })
 }
 
