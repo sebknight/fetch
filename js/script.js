@@ -80,8 +80,9 @@ async function getFacts(query) {
     const cleanTitle = () => {
       if (pageTitle.includes('(')) {
         return pageTitle.substring('0', pageTitle.indexOf('('));
+      } else {
+        return pageTitle;
       }
-      return pageTitle;
     };
 
     title.textContent = cleanTitle();
@@ -100,6 +101,7 @@ async function getFacts(query) {
     const div = document.createElement('div');
     div.innerHTML = snippet;
     const cleanSnippet = div.textContent;
+    div.remove();
 
     // Get the first sentence of the snippet
     const firstSentence = `${cleanSnippet.substring(0, cleanSnippet.indexOf('.'))}.`;
@@ -129,6 +131,8 @@ async function getFacts(query) {
     hideLoader();
   } catch(err) {
     // Set generic content on failure
+    // Timeout prevents text loading ahead of image
+    await new Promise((resolve, reject) => setTimeout(resolve, 750));
     title.textContent = 'A Good Dog';
     article.textContent = 'All dogs are good dogs.';
     hideLoader();
