@@ -73,6 +73,8 @@ async function getDogs(endpoint) {
       throw new Error('invalid dog');
     }
 
+    img.onerror = new Error;
+
     // Break down the response to extract the breed name
     const pathArr = path.split('/');
     const breedIndex = pathArr[4];
@@ -161,8 +163,10 @@ async function getFacts(query) {
     }
 
     // Wait to hide loader - Dog API isn't the fastest at serving images
+    // Img errors are also handled in getDogs()
     await new Promise((resolve, reject) => {
       img.onload = () => resolve(hideLoader());
+      img.onerror = () => reject(new Error);
     });
   } catch (err) {
     // Set generic content if no results
