@@ -1,0 +1,33 @@
+{
+  "name": "dog-facts",
+  "version": "1.0.0",
+  "description": "Fetches random dog from Dog API then queries Wikipedia for information about breed",
+  "main": "Gruntfile.js",
+  "dependencies": {
+    "grunt": "^1.0.4",
+    "grunt-eslint": "^22.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-google": "^0.14.0"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebknight/dog-facts.git"
+  },
+  "keywords": [
+    "dog",
+    "api",
+    "async",
+    "wikipedia"
+  ],
+  "author": "sebastian maddox",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sebknight/dog-facts/issues"
+  },
+  "homepage": "https://github.com/sebknight/dog-facts#readme"
+}

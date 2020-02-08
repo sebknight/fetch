@@ -7,44 +7,49 @@ const link = document.querySelector('.content__link');
 const loader = document.querySelector('.loader');
 const title = document.querySelector('.content__title');
 
-const domParser = new DOMParser();
-
 // Endpoints
 const dogAPI = 'https://dog.ceo/api/breeds/image/random';
-const wikiAPI = 'https://en.wikipedia.org/w/api.php';
+const wikiAPI = 'https://en.wikipedia.org/w/api.php?action=query';
 
 // Toggle loader and prevent multiple requests
 const showLoader = () => {
   btn.disabled = true;
   content.style.display = 'none';
-  loader.style.visibility = 'visible';
-}
+  loader.style.display = 'block';
+};
 
 const hideLoader = () => {
   btn.disabled = false;
-  loader.style.visibility = 'hidden';
-  content.style.display = 'flex';
-}
+  loader.style.display = 'none';
+  content.style.display = 'block';
+};
 
-// Query the Dog API
+/** Query the Dog API
+ * @param {string} api
+ */
 async function getDogs(api) {
   try {
     // Clear previous image
     img.src = '';
 
     // Get data
-    let response = await fetch(api);
-    let data = await response.json();
-    console.log(data);
-    
-    // Get image
-    let path = data.message;
+    const response = await fetch(api);
 
-    // Handles edge case where plott hound serves txt
-    if (!path.includes('.txt')) {
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    const data = await response.json();
+
+    // Get image path
+    const path = data.message;
+
+    // Handles edge cases where plott hound serves txt
+    // and german shepherd returns article about Doane Pet Care
+    if (!path.includes('.txt') && !path.includes('germanshepherd')) {
       img.src = path;
     } else {
-      throw new Error('invalid format');
+      throw new Error('invalid dog');
     }
 
     // Break down the response to extract the breed name
@@ -54,9 +59,10 @@ async function getDogs(api) {
     const breed = breedIndex.replace('-', '%20');
 
     // Build query for Wikipedia API
-    let query = `${wikiAPI}?action=query&list=search&srsearch=${breed}%20dog&format=json&origin=*`
+    const query =
+    `${wikiAPI}&list=search&srsearch=${breed}%20dog&format=json&origin=*`;
     return query;
-  } catch(err) {
+  } catch (err) {
     // Show dog emoji if Dog API call fails
     img.src = './img/dog.png';
     img.alt = 'Dog emoji';
@@ -64,21 +70,22 @@ async function getDogs(api) {
   }
 }
 
-// Query the Wikipedia API
+/** Query the Wikipedia API
+ * @param {string} query
+ */
 async function getFacts(query) {
+  // Get data
   try {
-    // Get data
-    let response = await fetch(query);
-    let data = await response.json();
+    const response = await fetch(query);
+    const data = await response.json();
 
-    await data; 
     if (data.query.search.length === 0) {
       throw new Error('no results');
     }
 
     // Get page title
-    let pageTitle = data.query.search[0].title;
-    
+    const pageTitle = data.query.search[0].title;
+
     // Remove anything in brackets e.g. disambiguation
     const cleanTitle = () => {
       if (pageTitle.includes('(')) {
@@ -88,35 +95,35 @@ async function getFacts(query) {
       }
     };
 
-    // Scrub title and set the image alt text
+    // Set title and image alt text
     title.textContent = cleanTitle();
     img.alt = cleanTitle();
 
     // Get page link
-    let pageID = data.query.search[0].pageid;
-    link.style.display = 'flex';
+    const pageID = data.query.search[0].pageid;
+    link.style.display = 'block';
     link.href = `https://en.wikipedia.org?curid=${pageID}`;
-    
+
     // Get snippet
-    let snippet = data.query.search[0].snippet;
+    const snippet = data.query.search[0].snippet;
 
     // Scrub the markup to get text
-    const cleanSnippet = snippet.replace(/<\/?[a-z][a-z0-9]*[^<>]*>/ig, '');
-    const escapedQuotesSnippet = cleanSnippet.replace(/&quot;/ig, '"');
+    const scrubHTML = snippet.replace(/<\/?[a-z][a-z0-9]*[^<>]*>/ig, '');
+    const escQuotes = scrubHTML.replace(/&quot;/ig, '"');
 
     // Get the first sentence of the snippet
-    const firstSentence = `${escapedQuotesSnippet.substring(0, escapedQuotesSnippet.indexOf('.'))}.`;
+    const firstSentence = `${escQuotes.substring(0, escQuotes.indexOf('.'))}.`;
 
     // Reduce garbage output
     // These breeds have oddly punctuated/inaccurate/weird snippets
-    const edgeCases = 
-    ['Akita', 'Chihuahua', 'Keeshond', 'Leonberg', 
-    'Malinois', 'mixed', 'Old English Bulldog',
-    'Jack', 'Siberian'];
+    const edgeCases =
+    ['Akita', 'Bernard', 'Chihuahua', 'Keeshond',
+      'Jack', 'Leonberg', 'Malinois', 'mixed',
+      'Old English Bulldog', 'Siberian'];
 
     // Check if sentence contains any of the edge cases
-    const isEdgeCase = edgeCases.some(c => firstSentence.includes(c));
-    
+    const isEdgeCase = edgeCases.some((c) => firstSentence.includes(c));
+
     // Some snippets seem to start mid-sentence
     const hasCaps = firstSentence[0] !== firstSentence[0].toLowerCase();
 
@@ -124,18 +131,17 @@ async function getFacts(query) {
     if (!isEdgeCase && hasCaps && firstSentence.length > 20) {
       article.textContent = firstSentence;
     } else {
-      throw new Error('invalid snippet');
+      // We can keep the title if the snippet is invalid
+      article.textContent = 'That\'s a great dog!!';
     }
 
     // Wait to hide loader - Dog API isn't the fastest at serving images
     await new Promise((resolve, reject) => setTimeout(resolve, 750));
     hideLoader();
-  } catch(err) {
-    // Set generic content on failure
-    // Timeout prevents text loading ahead of image
-    await new Promise((resolve, reject) => setTimeout(resolve, 750));
-    title.textContent = 'A Good Dog';
-    article.textContent = 'All dogs are good dogs.';
+  } catch (err) {
+    // Set generic content if no results
+    article.textContent = 'That\'s a great dog!!';
+    title.textContent = 'Cool Dog';
     hideLoader();
   } finally {
     return;
@@ -146,5 +152,5 @@ async function getFacts(query) {
 btn.addEventListener('click', () => {
   showLoader();
   getDogs(dogAPI)
-    .then(query => getFacts(query))
+      .then((query) => getFacts(query));
 });
