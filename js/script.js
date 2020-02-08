@@ -162,11 +162,12 @@ async function getFacts(query) {
       article.textContent = getGeneric(genArticle);
     }
 
-    // Wait to hide loader - Dog API isn't the fastest at serving images
+    // Hide loader once img served
     // Img errors are also handled in getDogs()
+    // Timeout prevents premature error if img loads quickly
     await new Promise((resolve, reject) => {
       img.onload = () => resolve(hideLoader());
-      img.onerror = () => reject(new Error);
+      img.onerror = () => setTimeout(2000, reject(new Error));
     });
   } catch (err) {
     // Set generic content if no results
