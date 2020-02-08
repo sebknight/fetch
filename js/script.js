@@ -30,7 +30,7 @@ const genArticle =
 ['That\'s a great dog!!', 'NICE.', 'You love to see it.', 'An angel!'];
 const genTitle = ['Cool Dog', 'Great Dog', 'Nice Dog',
   'Perfect Dog', 'Rad Dog'];
-
+// Get random generic content
 const getGeneric = (gen) => {
   return gen[Math.floor(Math.random()*gen.length)];
 };
@@ -73,7 +73,7 @@ async function getDogs(endpoint) {
       throw new Error('invalid dog');
     }
 
-    img.onerror = new Error;
+    img.onerror = new Error('image failed to load');
 
     // Break down the response to extract the breed name
     const pathArr = path.split('/');
@@ -97,8 +97,12 @@ async function getDogs(endpoint) {
  * @param {string} query
  */
 async function getFacts(query) {
-  // Get data
   try {
+    // Clear previous content
+    title.textContent = '';
+    article.textContent = '';
+
+    // Get data
     const response = await fetch(query);
 
     if (!response.ok) {
@@ -167,7 +171,8 @@ async function getFacts(query) {
     // Timeout prevents premature error if img loads quickly
     await new Promise((resolve, reject) => {
       img.onload = () => resolve(hideLoader());
-      img.onerror = () => setTimeout(2000, reject(new Error));
+      img.onerror = () => setTimeout(5000,
+          reject(new Error('image failed to load')));
     });
   } catch (err) {
     // Set generic content if no results

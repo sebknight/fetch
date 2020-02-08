@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css?family=Caveat:700|Raleway&display=swap");
 body, html {
   height: 100%;
   width: 100%;
@@ -10,6 +11,8 @@ body, html {
   width: 100%;
   margin: 0 auto;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
   display: flex;
   box-sizing: border-box;
   flex-flow: column wrap;
@@ -19,9 +22,10 @@ body, html {
 }
 
 .heading {
-  display: block;
   margin-top: 2rem;
   margin-bottom: 2rem;
+  font-family: "Caveat", cursive, serif;
+  font-size: 32px;
 }
 
 .content {
@@ -29,10 +33,13 @@ body, html {
   flex-flow: column wrap;
   align-items: center;
   width: 80%;
+  font-family: "Raleway", sans-serif;
+  font-size: 24px;
 }
 
 .btn {
   margin-top: 2rem;
+  font-family: "Raleway", sans-serif;
 }
 
 .content__img {
