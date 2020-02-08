@@ -21,6 +21,7 @@ const showLoader = () => {
 
 const hideLoader = () => {
   btn.disabled = false;
+  img.style.display = 'block';
   content.style.display = 'flex';
   loader.style.display = 'none';
 };
@@ -49,7 +50,22 @@ async function getDogs(endpoint) {
     img.src = '';
 
     // Get data
-    const response = await fetch(endpoint);
+    // Fetch request wrapped in a timeout to avoid infinite load
+    let didTimeOut = false;
+
+    const response = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        didTimeOut = true;
+        reject(new Error('Request timed out'));
+      }, 5000);
+      fetch(endpoint)
+          .then((response) => {
+            clearTimeout(timeout);
+            if (!didTimeOut) {
+              resolve(response);
+            }
+          });
+    });
 
     if (!response.ok) {
       throw new Error(response.statusText);
@@ -89,7 +105,9 @@ async function getDogs(endpoint) {
     // Show dog emoji if Dog API call fails
     img.src = './img/dog.png';
     img.alt = 'Dog emoji';
-    hideLoader();
+    link.style.display = 'none';
+    img.onload = () =>
+      hideLoader();
   }
 }
 
@@ -150,7 +168,7 @@ async function getFacts(query) {
     // Some snippets seem to start mid-sentence
     const hasCaps = firstSentence[0] !== firstSentence[0].toLowerCase();
 
-    // These breeds produce weird/unrelated snippets
+    // These breeds produce oddly punctuated/weird/unrelated snippets
     const snippetEdgeCases =
       ['Affenpinscher', 'Akita', 'Chihuahua', 'Keeshond',
         'Jack', 'Leonberg', 'Merrill', 'Malinois',
@@ -171,12 +189,13 @@ async function getFacts(query) {
     // Timeout prevents premature error if img loads quickly
     await new Promise((resolve, reject) => {
       img.onload = () => resolve(hideLoader());
-      img.onerror = () => setTimeout(5000,
+      img.onerror = () => setInterval(5000,
           reject(new Error('image failed to load')));
     });
   } catch (err) {
     // Set generic content if no results
     // Generic content defined globally
+    console.log(err);
     article.textContent = getGeneric(genArticle);
     title.textContent = getGeneric(genTitle);
     hideLoader();
