@@ -1,4 +1,4 @@
-// DOM nodes
+// DOM NODES
 const article = document.querySelector('.content__article');
 const btn = document.querySelector('.btn');
 const content = document.querySelector('.content');
@@ -7,10 +7,11 @@ const link = document.querySelector('.content__link');
 const loader = document.querySelector('.loader');
 const title = document.querySelector('.content__title');
 
-// Endpoints
+// ENDPOINTS
 const dogAPI = 'https://dog.ceo/api/breeds/image/random';
-const wikiAPI = 'https://en.wikipedia.org/w/api.php?action=query';
+const wikiAPI = 'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=';
 
+// GLOBAL FUNCTIONS
 // Toggle loader and prevent multiple requests
 const showLoader = () => {
   btn.disabled = true;
@@ -20,20 +21,35 @@ const showLoader = () => {
 
 const hideLoader = () => {
   btn.disabled = false;
+  content.style.display = 'flex';
   loader.style.display = 'none';
-  content.style.display = 'block';
+};
+
+// Handle failures gracefully with generic content
+const genArticle =
+['That\'s a great dog!!', 'NICE.', 'You love to see it.', 'An angel!'];
+const genTitle = ['Cool Dog', 'Great Dog', 'Nice Dog',
+  'Perfect Dog', 'Rad Dog'];
+
+const getGeneric = (gen) => {
+  return gen[Math.floor(Math.random()*gen.length)];
+};
+
+// Check for edge cases, used to reduce garbage output
+const isEdgeCase = (cases, str) => {
+  return cases.some((c) => str.includes(c));
 };
 
 /** Query the Dog API
- * @param {string} api
+ * @param {string} endpoint
  */
-async function getDogs(api) {
+async function getDogs(endpoint) {
   try {
     // Clear previous image
     img.src = '';
 
     // Get data
-    const response = await fetch(api);
+    const response = await fetch(endpoint);
 
     if (!response.ok) {
       throw new Error(response.statusText);
@@ -44,9 +60,14 @@ async function getDogs(api) {
     // Get image path
     const path = data.message;
 
-    // Handles edge cases where plott hound serves txt
-    // and german shepherd returns article about Doane Pet Care
-    if (!path.includes('.txt') && !path.includes('germanshepherd')) {
+    // Set image if it's valid
+    // Dog API serves txt instead of img for plott hound
+    // St Bernard and German Shepherd result in unrelated Wiki articles
+    // Separating dog and snippet edge cases maximises available results
+    // by ensuring we can see the image even if the snippet is invalid
+    const dogEdgeCases = ['txt', 'plott', 'bernard', 'germanshepherd'];
+
+    if (!isEdgeCase(dogEdgeCases, path)) {
       img.src = path;
     } else {
       throw new Error('invalid dog');
@@ -60,7 +81,7 @@ async function getDogs(api) {
 
     // Build query for Wikipedia API
     const query =
-    `${wikiAPI}&list=search&srsearch=${breed}%20dog&format=json&origin=*`;
+    `${wikiAPI}${breed}%20dog&format=json&origin=*`;
     return query;
   } catch (err) {
     // Show dog emoji if Dog API call fails
@@ -77,6 +98,11 @@ async function getFacts(query) {
   // Get data
   try {
     const response = await fetch(query);
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
     const data = await response.json();
 
     if (data.query.search.length === 0) {
@@ -114,34 +140,35 @@ async function getFacts(query) {
     // Get the first sentence of the snippet
     const firstSentence = `${escQuotes.substring(0, escQuotes.indexOf('.'))}.`;
 
-    // Reduce garbage output
-    // These breeds have oddly punctuated/inaccurate/weird snippets
-    const edgeCases =
-    ['Akita', 'Bernard', 'Chihuahua', 'Keeshond',
-      'Jack', 'Leonberg', 'Malinois', 'mixed',
-      'Old English Bulldog', 'Siberian'];
-
-    // Check if sentence contains any of the edge cases
-    const isEdgeCase = edgeCases.some((c) => firstSentence.includes(c));
-
+    // Following functions reduce garbage output
     // Some snippets seem to start mid-sentence
     const hasCaps = firstSentence[0] !== firstSentence[0].toLowerCase();
 
-    // 20 char limit catches junk snippets
-    if (!isEdgeCase && hasCaps && firstSentence.length > 20) {
+    // These breeds produce weird/unrelated snippets
+    const snippetEdgeCases =
+      ['Affenpinscher', 'Akita', 'Chihuahua', 'Keeshond',
+        'Jack', 'Leonberg', 'Merrill', 'Malinois',
+        'mixed', 'Old English Bulldog', 'Siberian'];
+
+    // 20 chars is a good limit to avoid junk strings
+    if (!isEdgeCase(snippetEdgeCases, firstSentence) &&
+      hasCaps && firstSentence.length >= 20) {
       article.textContent = firstSentence;
     } else {
       // We can keep the title if the snippet is invalid
-      article.textContent = 'That\'s a great dog!!';
+      // Generic articles defined globally
+      article.textContent = getGeneric(genArticle);
     }
 
     // Wait to hide loader - Dog API isn't the fastest at serving images
-    await new Promise((resolve, reject) => setTimeout(resolve, 750));
-    hideLoader();
+    await new Promise((resolve, reject) => {
+      img.onload = () => resolve(hideLoader());
+    });
   } catch (err) {
     // Set generic content if no results
-    article.textContent = 'That\'s a great dog!!';
-    title.textContent = 'Cool Dog';
+    // Generic content defined globally
+    article.textContent = getGeneric(genArticle);
+    title.textContent = getGeneric(genTitle);
     hideLoader();
   } finally {
     return;

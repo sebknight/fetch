@@ -8,5 +8,7 @@ Get random dog image from the <a href="https://dog.ceo/dog-api/">Dog API</a>, th
 
 ### Technical details
 This project uses the Fetch API to asynchronously request data from the Dog and Wikipedia APIs.
-It uses Grunt to automate ESLinting.
-Error handling captures instances where the Dog or Wikipedia API calls fail or where there are no results, as well as reducing garbage output by providing sensible defaults.
+It uses Grunt to automate ESLinting and compile SCSS.
+Error handling captures instances where the Dog or Wikipedia API calls fail or where there are no results, 
+as well as reducing garbage output by providing sensible defaults.
+Currently doesn't support IE11, but I'll probably implement a Fetch polyfill in the future.
