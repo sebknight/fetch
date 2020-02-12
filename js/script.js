@@ -5,7 +5,7 @@ const cancelBtn = document.querySelector('.cancel');
 const content = document.querySelector('.content');
 const img = document.querySelector('.content__img');
 const link = document.querySelector('.content__link');
-const loader = document.querySelector('.loader');
+const loader = document.querySelector('.lds-heart');
 const title = document.querySelector('.content__title');
 
 // ENDPOINTS
@@ -16,12 +16,14 @@ const wikiAPI = 'https://en.wikipedia.org/w/api.php?action=query&list=search&srs
 // Toggle loader and prevent multiple requests
 const showLoader = () => {
   btn.disabled = true;
+  cancelBtn.disabled = false;
   content.style.display = 'none';
-  loader.style.display = 'block';
+  loader.style.display = 'inline-block';
 };
 
 const hideLoader = () => {
   btn.disabled = false;
+  cancelBtn.disabled = true;
   img.style.display = 'block';
   content.style.display = 'flex';
   loader.style.display = 'none';

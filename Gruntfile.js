@@ -14,6 +14,19 @@ module.exports = function(grunt) {
         },
       },
     },
+    postcss: {
+      options: {
+        map: true, // inline sourcemaps
+        processors: [
+          require('pixrem')(), // add fallbacks for rem units
+          require('autoprefixer')({overrideBrowserslist: 'last 2 versions'}), // add vendor prefixes
+          require('cssnano')() // minify the result
+        ]
+      },
+      dist: {
+        src: 'css/*.css'
+      }
+    },
     watch: {
       css: {
         files: ['./css/style.scss'],
@@ -27,8 +40,9 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-sass');
+  grunt.loadNpmTasks('grunt-postcss');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-eslint');
 
-  grunt.registerTask('default', ['watch', 'eslint', 'sass']);
+  grunt.registerTask('default', ['watch', 'eslint', 'sass', 'postcss']);
 };
