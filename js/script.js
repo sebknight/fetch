@@ -1,6 +1,7 @@
 // DOM NODES
 const article = document.querySelector('.content__article');
 const btn = document.querySelector('.btn');
+const cancelBtn = document.querySelector('.cancel');
 const content = document.querySelector('.content');
 const img = document.querySelector('.content__img');
 const link = document.querySelector('.content__link');
@@ -27,10 +28,11 @@ const hideLoader = () => {
 };
 
 // Handle failures gracefully with generic content
-const genArticle =
+const genArticles =
 ['That\'s a great dog!!', 'NICE.', 'You love to see it.', 'An angel!'];
-const genTitle = ['Cool Dog', 'Great Dog', 'Nice Dog',
+const genTitles = ['Cool Dog', 'Great Dog', 'Nice Dog',
   'Perfect Dog', 'Rad Dog'];
+
 // Get random generic content
 const getGeneric = (gen) => {
   return gen[Math.floor(Math.random()*gen.length)];
@@ -49,8 +51,7 @@ async function getDogs(endpoint) {
     // Clear previous image
     img.src = '';
 
-    // Get data
-    // Fetch request wrapped in a timeout to avoid infinite load
+    // Get data - fetch wrapped in a timeout to avoid infinite load
     let didTimeOut = false;
 
     const response = await new Promise((resolve, reject) => {
@@ -76,11 +77,11 @@ async function getDogs(endpoint) {
     // Get image path
     const path = data.message;
 
-    // Set image if it's valid
-    // Dog API serves txt instead of img for plott hound
-    // St Bernard and German Shepherd result in unrelated Wiki articles
-    // Separating dog and snippet edge cases maximises available results
-    // by ensuring we can see the image even if the snippet is invalid
+    /* Set image if it's valid
+    Dog API serves txt instead of img for plott hound
+    St Bernard and German Shepherd result in unrelated Wiki articles
+    Separating dog and snippet edge cases maximises available results
+    by ensuring we can see the image even if the snippet is invalid */
     const dogEdgeCases = ['txt', 'plott', 'bernard', 'germanshepherd'];
 
     if (!isEdgeCase(dogEdgeCases, path)) {
@@ -97,7 +98,9 @@ async function getDogs(endpoint) {
     // Replace any dashes in the breed name with a space
     const breed = breedIndex.replace('-', '%20');
 
-    // Build query for Wikipedia API
+    /* Build query for Wikipedia API
+    Add 'dog' to increase specificity i.e. without it
+    Cairn terrier returns article about cairns (rocks) */
     const query =
     `${wikiAPI}${breed}%20dog&format=json&origin=*`;
     return query;
@@ -128,14 +131,12 @@ async function getFacts(query) {
     }
 
     const data = await response.json();
-
     if (data.query.search.length === 0) {
       throw new Error('no results');
     }
 
     // Get page title
     const pageTitle = data.query.search[0].title;
-
     // Remove anything in brackets e.g. disambiguation
     const cleanTitle = () => {
       if (pageTitle.includes('(')) {
@@ -164,8 +165,8 @@ async function getFacts(query) {
     // Get the first sentence of the snippet
     const firstSentence = `${escQuotes.substring(0, escQuotes.indexOf('.'))}.`;
 
-    // Following functions reduce garbage output
-    // Some snippets seem to start mid-sentence
+    /* Following functions reduce garbage output
+    Some snippets seem to start mid-sentence */
     const hasCaps = firstSentence[0] !== firstSentence[0].toLowerCase();
 
     // These breeds produce oddly punctuated/weird/unrelated snippets
@@ -179,25 +180,25 @@ async function getFacts(query) {
       hasCaps && firstSentence.length >= 20) {
       article.textContent = firstSentence;
     } else {
-      // We can keep the title if the snippet is invalid
-      // Generic articles defined globally
-      article.textContent = getGeneric(genArticle);
+      /* We can keep the title if the snippet is invalid
+      Generic articles are defined globally */
+      article.textContent = getGeneric(genArticles);
     }
 
-    // Hide loader once img served
-    // Img errors are also handled in getDogs()
-    // Timeout prevents premature error if img loads quickly
+    /* Hide loader once img served
+    Img errors are also handled in getDogs()
+    Timeout prevents premature error if img loads quickly */
     await new Promise((resolve, reject) => {
       img.onload = () => resolve(hideLoader());
       img.onerror = () => setInterval(5000,
           reject(new Error('image failed to load')));
     });
   } catch (err) {
-    // Set generic content if no results
-    // Generic content defined globally
-    console.log(err);
-    article.textContent = getGeneric(genArticle);
-    title.textContent = getGeneric(genTitle);
+    /* Set generic content if no results
+    Generic content defined globally */
+    article.textContent = getGeneric(genArticles);
+    title.textContent = getGeneric(genTitles);
+    link.style.display = 'none';
     hideLoader();
   } finally {
     return;
@@ -209,4 +210,10 @@ btn.addEventListener('click', () => {
   showLoader();
   getDogs(dogAPI)
       .then((query) => getFacts(query));
+});
+
+cancelBtn.addEventListener('click', () => {
+  // In case of emergency
+  // Can't halt the asyncs but will act as an eject
+  hideLoader();
 });
