@@ -66,7 +66,7 @@ body, html {
   @include zero-spacing;
   @include smooth-font;
   @include vert-center-content;
-  background-color: rgba(0,0,0,0.2);
+  background-color: rgba(0,0,0,0.15);
   justify-content: flex-start;
   flex-flow: column wrap;
   box-sizing: border-box;
@@ -75,13 +75,13 @@ body, html {
 .heading {
   @include vert-center-content;
   @include zero-spacing;
-  flex-flow: column wrap;
+  flex-flow: column nowrap;
   height: 30%;
   width:  100%;
   font-size: 2rem;
   font-family: $heading-font;
   @include bp(tablet) {
-    width: 30%;
+    width: 50%;
   }
 }
 
@@ -111,6 +111,8 @@ body, html {
 
 .btn-container {
   @include zero-spacing;
+  display: flex;
+  flex-flow: row nowrap;
 }
 
 .content {
