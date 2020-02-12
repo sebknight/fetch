@@ -83,9 +83,6 @@ body, html {
   @include bp(tablet) {
     width: 30%;
   }
-  @include bp(desktop) {
-    height: 25%
-  }
 }
 
 .btn {
@@ -126,7 +123,7 @@ body, html {
   justify-content: flex-start;
   font-family: $body-font;
   width: 100%;
-  max-height: 70%;
+  max-height: 65%;
   box-shadow: 20px 20px 28px -15px rgba(0,0,0,0.75);
   border-radius: 5px;
 
