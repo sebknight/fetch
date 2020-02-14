@@ -91,7 +91,7 @@ body, html {
 .content {
   display: flex;
   align-items: center;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   padding: 1rem;
   display: none;
   background: white;
