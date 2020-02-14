@@ -51,7 +51,7 @@ body, html {
   height: 30%;
   width: 100%;
   font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   font-family: "Caveat", cursive, serif;
 }
 @media (min-width: 768px) {
@@ -61,7 +61,7 @@ body, html {
 }
 
 .btn {
-  margin: 1rem;
+  margin: 0.5rem;
   font-size: 1.5rem;
   font-family: "Raleway", sans-serif;
   background: #ffff41;
